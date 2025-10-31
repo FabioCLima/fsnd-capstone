@@ -1,226 +1,165 @@
-# Casting Agency API - FSND Capstone Project
+# Casting Agency API - Full Stack Nanodegree Capstone Project
 
-API para gerenciar atores e filmes de uma agência de casting, desenvolvida como projeto final do Full Stack Nanodegree da Udacity.
+A RESTful API for managing actors and movies for a casting agency, built as the final project for Udacity's Full Stack Nanodegree program.
 
-## Tecnologias
+## Live Demo
 
-- **Python 3.10+**
-- **Flask** - Framework web
-- **SQLAlchemy 2.0** - ORM com tipagem moderna
-- **Pydantic** - Validação de dados e schemas
-- **PostgreSQL** - Banco de dados
-- **UV** - Gerenciador de dependências moderno
-- **Heroku** - Deploy em produção
+**Application URL:** https://fsnd-capstone-fabio-efc9d4953f5a.herokuapp.com/
 
-## Estrutura do Projeto
+## Project Overview
+
+The Casting Agency API is a backend application that enables users to:
+- Create, read, update, and delete actors
+- Create, read, update, and delete movies
+- Manage the relationship between actors and movies
+- Validate all input data using Pydantic schemas
+
+This project demonstrates:
+- RESTful API design principles
+- Modern Python development with type hints
+- Database modeling with SQLAlchemy 2.0
+- Data validation with Pydantic 2.x
+- Deployment to Heroku with PostgreSQL
+- Professional code organization and documentation
+
+## Technology Stack
+
+- **Python 3.10** - Programming language
+- **Flask 3.0** - Web framework
+- **SQLAlchemy 2.0** - ORM with modern typed mappings
+- **Pydantic 2.9** - Data validation and serialization
+- **PostgreSQL** - Production database
+- **Gunicorn** - WSGI HTTP Server
+- **Heroku** - Cloud platform deployment
+- **UV** - Modern Python package manager
+
+## Project Structure
 
 ```
 starter/
-├── app.py              # Aplicação Flask principal
-├── models.py           # Modelos SQLAlchemy e Schemas Pydantic
-├── test_app.py         # Testes unitários
-├── pyproject.toml      # Configuração do UV e dependências
-├── requirements.txt    # Dependências para Heroku
-├── Procfile           # Configuração Heroku
-├── runtime.txt        # Versão do Python para Heroku
-├── setup.sh           # Variáveis de ambiente (local)
-└── .env.example       # Exemplo de variáveis de ambiente
+├── app.py              # Flask application and API endpoints
+├── models.py           # SQLAlchemy models and Pydantic schemas
+├── test_app.py         # Unit tests
+├── pyproject.toml      # UV package configuration
+├── requirements.txt    # Python dependencies
+├── Procfile           # Heroku deployment configuration
+├── runtime.txt        # Python version for Heroku
+├── setup.sh           # Environment variables script
+├── .env.example       # Environment variables template
+└── README.md          # This file
 ```
 
-## Modelos de Dados
+## Data Models
 
 ### Actor
 - `id` (Integer, Primary Key)
-- `name` (String, required)
-- `age` (Integer, required)
-- `gender` (String, required)
-- `created_at` (DateTime)
+- `name` (String, required) - Actor's full name
+- `age` (Integer, required) - Actor's age (1-150)
+- `gender` (String, required) - Actor's gender
+- `created_at` (DateTime) - Record creation timestamp
 
 ### Movie
 - `id` (Integer, Primary Key)
-- `title` (String, required)
-- `release_date` (DateTime, required)
-- `created_at` (DateTime)
+- `title` (String, required) - Movie title
+- `release_date` (DateTime, required) - Movie release date
+- `created_at` (DateTime) - Record creation timestamp
 
 ### MovieActor (Association Table)
-- Relacionamento muitos-para-muitos entre Movies e Actors
+- Many-to-many relationship between Movies and Actors
+- `id` (Integer, Primary Key)
+- `movie_id` (Foreign Key to movies)
+- `actor_id` (Foreign Key to actors)
 
-## Instalação e Configuração
-
-### Pré-requisitos
-
-1. **PostgreSQL** instalado e rodando
-2. **Python 3.10+**
-3. **UV** (gerenciador de dependências)
-
-### Instalação do UV
-
-```bash
-# Linux/macOS
-curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# Windows
-powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
-
-# Ou via pip
-pip install uv
-```
-
-### Configuração do Projeto
-
-1. **Clone o repositório**
-```bash
-cd projects/capstone/starter
-```
-
-2. **Crie o banco de dados**
-```bash
-# Conecte ao PostgreSQL
-sudo -u postgres psql
-
-# Crie o banco de dados
-CREATE DATABASE capstone;
-
-# Saia do psql
-\q
-```
-
-3. **Configure as variáveis de ambiente**
-```bash
-# Copie o arquivo de exemplo
-cp .env.example .env
-
-# Edite o .env com suas configurações
-nano .env
-```
-
-4. **Instale as dependências com UV**
-```bash
-# Cria ambiente virtual e instala dependências
-uv sync
-
-# Ou usando requirements.txt tradicional
-uv pip install -r requirements.txt
-```
-
-5. **Configure o ambiente (método alternativo com setup.sh)**
-```bash
-chmod +x setup.sh
-source setup.sh
-```
-
-6. **Execute as migrações**
-```bash
-# Ative o ambiente virtual do UV
-source .venv/bin/activate  # Linux/macOS
-# ou
-.venv\Scripts\activate  # Windows
-
-# Inicialize as migrações
-flask db init
-flask db migrate -m "Initial migration"
-flask db upgrade
-```
-
-## Executando a Aplicação
-
-### Modo Desenvolvimento (com UV)
-
-```bash
-# Com UV (recomendado)
-uv run python app.py
-
-# Ou ativando o ambiente virtual
-source .venv/bin/activate
-python app.py
-```
-
-A API estará disponível em: `http://localhost:8080`
-
-### Modo Produção (com Gunicorn)
-
-```bash
-uv run gunicorn app:APP
-```
-
-## Endpoints da API
+## API Endpoints
 
 ### Health Check
 ```http
 GET /
 ```
+Returns API status and available endpoints.
 
-### Movies
-
-| Método | Endpoint | Descrição |
-|--------|----------|-----------|
-| GET | `/api/movies` | Lista todos os filmes |
-| GET | `/api/movies/<id>` | Busca filme por ID |
-| POST | `/api/movies` | Cria novo filme |
-| PATCH | `/api/movies/<id>` | Atualiza filme |
-| DELETE | `/api/movies/<id>` | Remove filme |
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Casting Agency API is running!",
+  "endpoints": {
+    "movies": "/api/movies",
+    "actors": "/api/actors"
+  }
+}
+```
 
 ### Actors
 
-| Método | Endpoint | Descrição |
-|--------|----------|-----------|
-| GET | `/api/actors` | Lista todos os atores |
-| GET | `/api/actors/<id>` | Busca ator por ID |
-| POST | `/api/actors` | Cria novo ator |
-| PATCH | `/api/actors/<id>` | Atualiza ator |
-| DELETE | `/api/actors/<id>` | Remove ator |
+#### Get All Actors
+```http
+GET /api/actors
+```
 
-## Exemplos de Uso
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "actors": [
+    {
+      "id": 1,
+      "name": "Tom Hanks",
+      "age": 67,
+      "gender": "Male",
+      "created_at": "2025-10-31T01:59:14.890404"
+    }
+  ],
+  "total_actors": 1
+}
+```
 
-### Criar um Ator
+#### Get Actor by ID
+```http
+GET /api/actors/<actor_id>
+```
 
-```bash
-curl -X POST http://localhost:8080/api/actors \
-  -H "Content-Type: application/json" \
-  -d '{
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "actor": {
+    "id": 1,
     "name": "Tom Hanks",
     "age": 67,
-    "gender": "Male"
-  }'
+    "gender": "Male",
+    "created_at": "2025-10-31T01:59:14.890404"
+  }
+}
 ```
 
-### Criar um Filme
+#### Create Actor
+```http
+POST /api/actors
+Content-Type: application/json
 
-```bash
-curl -X POST http://localhost:8080/api/movies \
-  -H "Content-Type: application/json" \
-  -d '{
-    "title": "Forrest Gump",
-    "release_date": "1994-07-06T00:00:00"
-  }'
+{
+  "name": "Tom Hanks",
+  "age": 67,
+  "gender": "Male"
+}
 ```
 
-### Listar Atores
-
-```bash
-curl http://localhost:8080/api/actors
+**Success Response (201):**
+```json
+{
+  "success": true,
+  "actor": {
+    "id": 1,
+    "name": "Tom Hanks",
+    "age": 67,
+    "gender": "Male",
+    "created_at": "2025-10-31T01:59:14.890404"
+  }
+}
 ```
 
-### Atualizar um Ator
-
-```bash
-curl -X PATCH http://localhost:8080/api/actors/1 \
-  -H "Content-Type: application/json" \
-  -d '{
-    "age": 68
-  }'
-```
-
-## Validação com Pydantic
-
-O projeto utiliza Pydantic para validação automática de dados:
-
-- **Campos obrigatórios** são validados automaticamente
-- **Tipos de dados** são verificados (int, str, datetime)
-- **Constraints** aplicados (idade entre 1-150, strings não vazias)
-- **Respostas padronizadas** com serialização automática
-
-Exemplo de erro de validação:
+**Validation Error Response (422):**
 ```json
 {
   "success": false,
@@ -235,113 +174,158 @@ Exemplo de erro de validação:
 }
 ```
 
-## Deploy no Heroku
+#### Update Actor
+```http
+PATCH /api/actors/<actor_id>
+Content-Type: application/json
 
-### 1. Instale o Heroku CLI
-
-```bash
-# Linux
-curl https://cli-assets.heroku.com/install.sh | sh
-
-# macOS
-brew tap heroku/brew && brew install heroku
-```
-
-### 2. Faça login no Heroku
-
-```bash
-heroku login
-```
-
-### 3. Crie a aplicação
-
-```bash
-# Crie o app
-heroku create nome-do-seu-app
-
-# Adicione o addon do PostgreSQL
-heroku addons:create heroku-postgresql:essential-0
-
-# Configure as variáveis de ambiente
-heroku config:set FLASK_APP=app.py
-heroku config:set FLASK_ENV=production
-```
-
-### 4. Deploy
-
-```bash
-# Faça commit das alterações
-git add .
-git commit -m "Prepare for Heroku deployment"
-
-# Faça deploy
-git push heroku master
-
-# Execute as migrações
-heroku run flask db upgrade
-
-# Abra a aplicação
-heroku open
-```
-
-### 5. Comandos úteis Heroku
-
-```bash
-# Ver logs
-heroku logs --tail
-
-# Executar comandos
-heroku run python
-
-# Ver configurações
-heroku config
-
-# Resetar banco de dados
-heroku pg:reset DATABASE_URL
-heroku run flask db upgrade
-```
-
-## Testes
-
-```bash
-# Execute os testes
-uv run pytest
-
-# Com coverage
-uv run pytest --cov=. --cov-report=html
-```
-
-## Comandos UV Úteis
-
-```bash
-# Adicionar nova dependência
-uv add nome-do-pacote
-
-# Adicionar dependência de desenvolvimento
-uv add --dev nome-do-pacote
-
-# Sincronizar dependências
-uv sync
-
-# Executar script
-uv run python script.py
-
-# Atualizar dependências
-uv lock --upgrade
-```
-
-## Estrutura de Resposta
-
-### Sucesso
-```json
 {
-  "success": true,
-  "actors": [...],
-  "total_actors": 10
+  "age": 68
 }
 ```
 
-### Erro
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "actor": {
+    "id": 1,
+    "name": "Tom Hanks",
+    "age": 68,
+    "gender": "Male",
+    "created_at": "2025-10-31T01:59:14.890404"
+  }
+}
+```
+
+#### Delete Actor
+```http
+DELETE /api/actors/<actor_id>
+```
+
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "deleted": 1
+}
+```
+
+### Movies
+
+#### Get All Movies
+```http
+GET /api/movies
+```
+
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "movies": [
+    {
+      "id": 1,
+      "title": "Forrest Gump",
+      "release_date": "1994-07-06T00:00:00",
+      "created_at": "2025-10-31T02:00:00.000000"
+    }
+  ],
+  "total_movies": 1
+}
+```
+
+#### Get Movie by ID
+```http
+GET /api/movies/<movie_id>
+```
+
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "movie": {
+    "id": 1,
+    "title": "Forrest Gump",
+    "release_date": "1994-07-06T00:00:00",
+    "created_at": "2025-10-31T02:00:00.000000"
+  }
+}
+```
+
+#### Create Movie
+```http
+POST /api/movies
+Content-Type: application/json
+
+{
+  "title": "Forrest Gump",
+  "release_date": "1994-07-06T00:00:00"
+}
+```
+
+**Success Response (201):**
+```json
+{
+  "success": true,
+  "movie": {
+    "id": 1,
+    "title": "Forrest Gump",
+    "release_date": "1994-07-06T00:00:00",
+    "created_at": "2025-10-31T02:00:00.000000"
+  }
+}
+```
+
+#### Update Movie
+```http
+PATCH /api/movies/<movie_id>
+Content-Type: application/json
+
+{
+  "title": "Forrest Gump (Special Edition)"
+}
+```
+
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "movie": {
+    "id": 1,
+    "title": "Forrest Gump (Special Edition)",
+    "release_date": "1994-07-06T00:00:00",
+    "created_at": "2025-10-31T02:00:00.000000"
+  }
+}
+```
+
+#### Delete Movie
+```http
+DELETE /api/movies/<movie_id>
+```
+
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "deleted": 1
+}
+```
+
+## Error Handling
+
+The API returns standardized error responses:
+
+### 400 Bad Request
+```json
+{
+  "success": false,
+  "error": 400,
+  "message": "Bad request"
+}
+```
+
+### 404 Not Found
 ```json
 {
   "success": false,
@@ -350,16 +334,307 @@ uv lock --upgrade
 }
 ```
 
-## Próximos Passos
+### 405 Method Not Allowed
+```json
+{
+  "success": false,
+  "error": 405,
+  "message": "Method not allowed"
+}
+```
 
-- [ ] Implementar autenticação Auth0
-- [ ] Adicionar roles-based access control (RBAC)
-- [ ] Implementar paginação nos endpoints
-- [ ] Adicionar filtros e busca
-- [ ] Implementar relacionamento Movie-Actor endpoints
-- [ ] Adicionar testes de integração
-- [ ] Configurar CI/CD
+### 422 Unprocessable Entity
+```json
+{
+  "success": false,
+  "error": 422,
+  "message": "Unprocessable entity"
+}
+```
 
-## Licença
+### 500 Internal Server Error
+```json
+{
+  "success": false,
+  "error": 500,
+  "message": "Internal server error"
+}
+```
 
-Este projeto faz parte do Full Stack Nanodegree da Udacity.
+## Local Development Setup
+
+### Prerequisites
+
+- Python 3.10 or higher
+- PostgreSQL database
+- UV package manager (recommended) or pip
+
+### Installation
+
+1. **Clone the repository**
+```bash
+git clone https://github.com/YOUR_USERNAME/fsnd-capstone.git
+cd fsnd-capstone
+```
+
+2. **Install UV (if not already installed)**
+```bash
+# Linux/macOS
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Windows
+powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# Or via pip
+pip install uv
+```
+
+3. **Create PostgreSQL database**
+```bash
+# Connect to PostgreSQL
+sudo -u postgres psql
+
+# Create database
+CREATE DATABASE capstone;
+
+# Exit psql
+\q
+```
+
+4. **Configure environment variables**
+```bash
+# Copy example file
+cp .env.example .env
+
+# Edit .env with your configuration
+nano .env
+```
+
+Example `.env` file:
+```env
+DATABASE_URL=postgresql://localhost:5432/capstone
+FLASK_APP=app.py
+FLASK_ENV=development
+PORT=8080
+```
+
+5. **Install dependencies**
+```bash
+# Using UV (recommended)
+uv sync
+
+# Or using pip
+pip install -r requirements.txt
+```
+
+6. **Initialize database**
+```bash
+# Activate virtual environment
+source .venv/bin/activate  # Linux/macOS
+# or
+.venv\Scripts\activate  # Windows
+
+# Create tables
+python -c "from app import APP; from models import db; APP.app_context().push(); db.create_all()"
+```
+
+7. **Run the application**
+```bash
+# Using UV
+uv run python app.py
+
+# Or if environment is activated
+python app.py
+```
+
+The API will be available at: `http://localhost:8080`
+
+## Testing
+
+Run the test suite:
+
+```bash
+# Using UV
+uv run pytest
+
+# Or with coverage
+uv run pytest --cov=. --cov-report=html
+```
+
+## Deployment to Heroku
+
+### Prerequisites
+
+- Heroku account (verified with payment method)
+- Heroku CLI installed
+
+### Deployment Steps
+
+1. **Install Heroku CLI**
+```bash
+curl https://cli-assets.heroku.com/install.sh | sh
+```
+
+2. **Login to Heroku**
+```bash
+heroku login -i
+```
+
+3. **Create Heroku app**
+```bash
+heroku create your-app-name
+```
+
+4. **Add PostgreSQL addon**
+```bash
+heroku addons:create heroku-postgresql:essential-0
+```
+
+5. **Set environment variables**
+```bash
+heroku config:set FLASK_APP=app.py
+heroku config:set FLASK_ENV=production
+```
+
+6. **Deploy application**
+```bash
+git push heroku main
+```
+
+7. **Initialize database**
+```bash
+heroku run "python -c 'from app import APP; from models import db; APP.app_context().push(); db.create_all()'"
+```
+
+8. **Open application**
+```bash
+heroku open
+```
+
+### Useful Heroku Commands
+
+```bash
+# View logs
+heroku logs --tail
+
+# Check app status
+heroku ps
+
+# Run commands
+heroku run python
+
+# View configuration
+heroku config
+
+# Reset database
+heroku pg:reset DATABASE_URL
+heroku run "python -c 'from app import APP; from models import db; APP.app_context().push(); db.create_all()'"
+```
+
+## Testing the Live API
+
+### Using curl
+
+**Get all actors:**
+```bash
+curl https://fsnd-capstone-fabio-efc9d4953f5a.herokuapp.com/api/actors
+```
+
+**Create an actor:**
+```bash
+curl -X POST https://fsnd-capstone-fabio-efc9d4953f5a.herokuapp.com/api/actors \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Meryl Streep", "age": 74, "gender": "Female"}'
+```
+
+**Create a movie:**
+```bash
+curl -X POST https://fsnd-capstone-fabio-efc9d4953f5a.herokuapp.com/api/movies \
+  -H "Content-Type: application/json" \
+  -d '{"title": "The Devil Wears Prada", "release_date": "2006-06-30T00:00:00"}'
+```
+
+**Update an actor:**
+```bash
+curl -X PATCH https://fsnd-capstone-fabio-efc9d4953f5a.herokuapp.com/api/actors/1 \
+  -H "Content-Type: application/json" \
+  -d '{"age": 75}'
+```
+
+**Delete a movie:**
+```bash
+curl -X DELETE https://fsnd-capstone-fabio-efc9d4953f5a.herokuapp.com/api/movies/1
+```
+
+## Features
+
+### Data Validation with Pydantic
+
+All input data is validated using Pydantic schemas:
+
+- **Type checking** - Ensures correct data types (int, str, datetime)
+- **Field validation** - Validates constraints (age 1-150, non-empty strings)
+- **Automatic serialization** - Converts SQLAlchemy models to JSON
+- **Detailed error messages** - Returns specific validation errors
+
+Example validation error:
+```json
+{
+  "success": false,
+  "error": "Validation error",
+  "details": [
+    {
+      "type": "int_parsing",
+      "loc": ["age"],
+      "msg": "Input should be a valid integer",
+      "input": "not a number"
+    }
+  ]
+}
+```
+
+### Modern SQLAlchemy 2.0
+
+- **Typed mappings** - Using `Mapped` and `mapped_column`
+- **Declarative models** - Clean and readable model definitions
+- **Relationships** - Proper many-to-many with association table
+- **Automatic timestamps** - Created_at fields with defaults
+
+### Production Ready
+
+- **CORS enabled** - Ready for frontend integration
+- **Error handling** - Comprehensive error responses
+- **Database migrations** - Support for Flask-Migrate
+- **Environment configuration** - Using python-dotenv
+- **Production WSGI server** - Gunicorn for deployment
+
+## Future Enhancements
+
+- [ ] Auth0 authentication and authorization
+- [ ] Role-Based Access Control (RBAC)
+  - Casting Assistant: View actors and movies
+  - Casting Director: Add/delete actors, modify movies
+  - Executive Producer: Full access
+- [ ] Pagination for large datasets
+- [ ] Search and filtering capabilities
+- [ ] Actor-Movie relationship endpoints
+- [ ] Integration tests
+- [ ] CI/CD pipeline
+- [ ] API documentation with Swagger/OpenAPI
+
+## Author
+
+**Fabio Lima**
+- Email: lima.fisico@gmail.com
+- GitHub: [Your GitHub Profile]
+- Heroku App: https://fsnd-capstone-fabio-efc9d4953f5a.herokuapp.com/
+
+## License
+
+This project is part of the Udacity Full Stack Nanodegree program.
+
+## Acknowledgments
+
+- Udacity Full Stack Nanodegree Program
+- Flask and SQLAlchemy communities
+- Pydantic for excellent data validation
