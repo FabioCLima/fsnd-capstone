@@ -11,7 +11,7 @@
 
 **Heroku URL:** https://fsnd-capstone-fabio-efc9d4953f5a.herokuapp.com/
 
-**GitHub Repository:** [Add your repository URL here]
+**GitHub Repository:** https://github.com/FabioCLima/fsnd-capstone
 
 ## Project Overview
 
@@ -338,7 +338,7 @@ curl -X POST https://fsnd-capstone-fabio-efc9d4953f5a.herokuapp.com/api/actors \
 **Student:** Fabio Lima
 **Email:** lima.fisico@gmail.com
 **Heroku App:** https://fsnd-capstone-fabio-efc9d4953f5a.herokuapp.com/
-**GitHub:** [To be added after pushing to GitHub]
+**GitHub:** https://github.com/FabioCLima/fsnd-capstone
 
 ---
 

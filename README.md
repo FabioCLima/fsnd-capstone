@@ -373,7 +373,7 @@ The API returns standardized error responses:
 
 1. **Clone the repository**
 ```bash
-git clone https://github.com/YOUR_USERNAME/fsnd-capstone.git
+git clone https://github.com/FabioCLima/fsnd-capstone.git
 cd fsnd-capstone
 ```
 
@@ -626,7 +626,7 @@ Example validation error:
 
 **Fabio Lima**
 - Email: lima.fisico@gmail.com
-- GitHub: [Your GitHub Profile]
+- GitHub: https://github.com/FabioCLima/fsnd-capstone
 - Heroku App: https://fsnd-capstone-fabio-efc9d4953f5a.herokuapp.com/
 
 ## License
