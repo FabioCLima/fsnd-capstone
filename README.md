@@ -39,12 +39,14 @@ This project demonstrates:
 starter/
 ├── app.py              # Flask application and API endpoints
 ├── models.py           # SQLAlchemy models and Pydantic schemas
+├── auth.py             # Auth0 integration and @requires_auth decorator
 ├── test_app.py         # Unit tests
 ├── pyproject.toml      # UV package configuration
 ├── requirements.txt    # Python dependencies
-├── Procfile           # Heroku deployment configuration
-├── runtime.txt        # Python version for Heroku
+├── Procfile            # Heroku deployment configuration
+├── runtime.txt         # Python version for Heroku
 ├── setup.sh           # Environment variables script
+├── manage.py (optional) # DB management helpers (create/drop/seed)
 ├── .env.example       # Environment variables template
 └── README.md          # This file
 ```
@@ -416,6 +418,11 @@ DATABASE_URL=postgresql://localhost:5432/capstone
 FLASK_APP=app.py
 FLASK_ENV=development
 PORT=8080
+# Auth0 config
+# Prefer API_AUDIENCE; AUTH0_AUDIENCE kept for compatibility
+AUTH0_DOMAIN=your-domain.auth0.com
+API_AUDIENCE=casting-agency
+ALGORITHMS=RS256
 ```
 
 5. **Install dependencies**
@@ -448,6 +455,24 @@ python app.py
 ```
 
 The API will be available at: `http://localhost:8080`
+
+## Authentication and Authorization
+
+This project includes `auth.py` with helpers for Auth0 JWT validation and a `@requires_auth` decorator you can apply to endpoints. Configure the following environment variables (via `.env` or `setup.sh`):
+
+- `AUTH0_DOMAIN` (e.g., `your-tenant.auth0.com`)
+- `API_AUDIENCE` (your API identifier, e.g., `casting-agency`)
+- `ALGORITHMS` (comma-separated list, default `RS256`)
+
+Example usage in `app.py` (not enforced by default):
+```python
+from auth import requires_auth
+
+@app.route('/api/movies-secure')
+@requires_auth('read:movies')
+def get_movies_secure():
+    ...
+```
 
 ## Testing
 
