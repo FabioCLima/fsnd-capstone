@@ -7,7 +7,7 @@ from functools import wraps
 from urllib.request import urlopen
 
 from jose import jwt
-from flask import request, _request_ctx_stack, abort
+from flask import request, abort, g
 
 
 class AuthError(Exception):
@@ -66,7 +66,11 @@ def verify_decode_jwt(token):
 
     jsonurl = urlopen(f"https://{AUTH0_DOMAIN}/.well-known/jwks.json")
     jwks = json.loads(jsonurl.read())
-    unverified_header = jwt.get_unverified_header(token)
+    try:
+        unverified_header = jwt.get_unverified_header(token)
+    except Exception:
+        # Token malformado ou ilegível
+        raise AuthError({"code": "invalid_header", "description": "Unable to parse authentication token."}, 400)
 
     if unverified_header.get("alg") == "HS256":
         # We expect RS256 tokens only
@@ -116,8 +120,8 @@ def requires_auth(permission=""):
             token = get_token_auth_header()
             payload = verify_decode_jwt(token)
             check_permissions(permission, payload)
-            # Attach payload to request context if needed downstream
-            _request_ctx_stack.top.current_user = payload
+            # Attach payload to request context if needed downstream (Flask 3)
+            g.current_user = payload
             return f(*args, **kwargs)
 
         return wrapper

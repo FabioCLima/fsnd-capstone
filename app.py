@@ -12,17 +12,18 @@ from models import (
     ActorCreate, ActorUpdate, ActorResponse
 )
 from pydantic import ValidationError
+from auth import AuthError, requires_auth
 
 
 def create_app(test_config=None):
     """Create and configure the Flask application"""
     app = Flask(__name__)
 
-    # Setup database
-    setup_db(app)
-
-    # Setup migrations
-    migrate = Migrate(app, db)
+    # Setup database (skip during unit tests; tests call setup_db themselves)
+    if os.environ.get('FLASK_TESTING') != '1':
+        setup_db(app)
+        # Setup migrations only when DB is configured
+        Migrate(app, db)
 
     # Setup CORS
     CORS(app, resources={r"/api/*": {"origins": "*"}})
@@ -57,6 +58,7 @@ def create_app(test_config=None):
         })
 
     @app.route('/api/movies', methods=['GET'])
+    @requires_auth('get:movies')
     def get_movies():
         """Get all movies"""
         try:
@@ -72,6 +74,7 @@ def create_app(test_config=None):
             abort(500)
 
     @app.route('/api/movies/<int:movie_id>', methods=['GET'])
+    @requires_auth('get:movies')
     def get_movie(movie_id):
         """Get a specific movie by ID"""
         movie = Movie.query.get_or_404(movie_id)
@@ -82,6 +85,7 @@ def create_app(test_config=None):
         })
 
     @app.route('/api/movies', methods=['POST'])
+    @requires_auth('post:movies')
     def create_movie():
         """Create a new movie"""
         try:
@@ -117,6 +121,7 @@ def create_app(test_config=None):
             abort(500)
 
     @app.route('/api/movies/<int:movie_id>', methods=['PATCH'])
+    @requires_auth('patch:movies')
     def update_movie(movie_id):
         """Update a movie"""
         try:
@@ -150,6 +155,7 @@ def create_app(test_config=None):
             abort(500)
 
     @app.route('/api/movies/<int:movie_id>', methods=['DELETE'])
+    @requires_auth('delete:movies')
     def delete_movie(movie_id):
         """Delete a movie"""
         try:
@@ -167,6 +173,7 @@ def create_app(test_config=None):
             abort(500)
 
     @app.route('/api/actors', methods=['GET'])
+    @requires_auth('get:actors')
     def get_actors():
         """Get all actors"""
         try:
@@ -182,6 +189,7 @@ def create_app(test_config=None):
             abort(500)
 
     @app.route('/api/actors/<int:actor_id>', methods=['GET'])
+    @requires_auth('get:actors')
     def get_actor(actor_id):
         """Get a specific actor by ID"""
         actor = Actor.query.get_or_404(actor_id)
@@ -192,6 +200,7 @@ def create_app(test_config=None):
         })
 
     @app.route('/api/actors', methods=['POST'])
+    @requires_auth('post:actors')
     def create_actor():
         """Create a new actor"""
         try:
@@ -228,10 +237,12 @@ def create_app(test_config=None):
             abort(500)
 
     @app.route('/api/actors/<int:actor_id>', methods=['PATCH'])
+    @requires_auth('patch:actors')
     def update_actor(actor_id):
         """Update an actor"""
+        # Fetch outside of try so 404 propagates
+        actor = Actor.query.get_or_404(actor_id)
         try:
-            actor = Actor.query.get_or_404(actor_id)
             data = request.get_json()
 
             # Validate with Pydantic
@@ -261,11 +272,12 @@ def create_app(test_config=None):
             abort(500)
 
     @app.route('/api/actors/<int:actor_id>', methods=['DELETE'])
+    @requires_auth('delete:actors')
     def delete_actor(actor_id):
         """Delete an actor"""
+        # Fetch outside of try so 404 propagates
+        actor = Actor.query.get_or_404(actor_id)
         try:
-            actor = Actor.query.get_or_404(actor_id)
-
             db.session.delete(actor)
             db.session.commit()
 
@@ -280,6 +292,13 @@ def create_app(test_config=None):
     # ========================================================================
     # Error Handlers
     # ========================================================================
+
+    @app.errorhandler(AuthError)
+    def handle_auth_error(ex):
+        """Handle authentication errors"""
+        response = jsonify(ex.error)
+        response.status_code = ex.status_code
+        return response
 
     @app.errorhandler(400)
     def bad_request(error):
@@ -324,8 +343,11 @@ def create_app(test_config=None):
     return app
 
 
-# Create the app instance
-APP = create_app()
+# Create the app instance (skip during unit tests to avoid connecting to default DB)
+if os.environ.get('FLASK_SKIP_APP_INIT_FOR_TESTS') == '1':
+    APP = None
+else:
+    APP = create_app()
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8080))
